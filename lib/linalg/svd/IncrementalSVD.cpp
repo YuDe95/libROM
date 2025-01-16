@@ -456,7 +456,8 @@ IncrementalSVD::svd(
     int ldv = d_num_samples+1;
     int lwork = m*(4*m + 7);
     double* work = new double [lwork];
-    int iwork[8*m];
+    // int iwork[8*m];//yyd
+    int *iwork = new int [8*m];
     int info;
     dgesdd(&jobz,
            &m,
@@ -472,6 +473,7 @@ IncrementalSVD::svd(
            &lwork,
            iwork,
            &info);
+    delete [] iwork;//yyd
     delete [] work;
 
     // If the svd succeeded, fill U and S.  Otherwise clean up and return.

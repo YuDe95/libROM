@@ -94,6 +94,7 @@ check_include_files("${stdc_header_list}" CAROM_STDC_HEADERS)
 find_package(HDF5 1.8.0 REQUIRED)
 find_package(BLAS 3.4.0 REQUIRED)
 find_package(LAPACK 3.4.0 REQUIRED)
+find_package(Boost REQUIRED)
 
 # In FindMPI.cmake, "CXX" refers to "the MPI C API [being] usable from C++"
 find_package(MPI 1.2 REQUIRED)
@@ -193,7 +194,8 @@ if (ENABLE_EXAMPLES)
         PRIVATE ROM ${MPI_C_LINK_FLAGS} ${MPI_C_LIBRARIES} MPI::MPI_C ${MPI_FORTRAN_LINK_FLAGS} ${MPI_FORTRAN_LIBRARIES} MPI::MPI_Fortran)
       target_include_directories(${name}
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-        ${MPI_C_INCLUDE_DIRS})
+        ${MPI_C_INCLUDE_DIRS}
+        ${Boost_INCLUDE_DIRS})
       target_compile_features(${name} PRIVATE cxx_std_11)
     endforeach() # IN LISTS examples
     file(COPY examples/data DESTINATION ${CMAKE_BINARY_DIR}/examples)

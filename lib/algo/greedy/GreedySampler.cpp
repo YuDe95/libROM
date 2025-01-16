@@ -247,10 +247,12 @@ GreedySampler::addDatabaseFromFile(
     database.getInteger(tmp, num_parameter_sampled_indices);
     if (num_parameter_sampled_indices > 0)
     {
-        int temp_parameter_sampled_indices[num_parameter_sampled_indices];
+        // int temp_parameter_sampled_indices[num_parameter_sampled_indices];//yyd
+        int* temp_parameter_sampled_indices = new int[num_parameter_sampled_indices];
         sprintf(tmp, "parameter_sampled_indices");
         database.getIntegerArray(tmp, &temp_parameter_sampled_indices[0],
                                  num_parameter_sampled_indices);
+        delete[] temp_parameter_sampled_indices;//yyd
         for (int i = 0; i < num_parameter_sampled_indices; i++)
         {
             std::string vec_path = warm_start_file_name + "_" + std::to_string(i);
@@ -302,7 +304,8 @@ GreedySampler::load(
     database.getInteger(tmp, num_parameter_sampled_indices);
     if (num_parameter_sampled_indices > 0)
     {
-        int temp_parameter_sampled_indices[num_parameter_sampled_indices];
+        // int temp_parameter_sampled_indices[num_parameter_sampled_indices];//yyd
+        int* temp_parameter_sampled_indices = new int[num_parameter_sampled_indices];
         sprintf(tmp, "parameter_sampled_indices");
         database.getIntegerArray(tmp, &temp_parameter_sampled_indices[0],
                                  num_parameter_sampled_indices);
@@ -310,6 +313,7 @@ GreedySampler::load(
         {
             d_parameter_sampled_indices.insert(temp_parameter_sampled_indices[i]);
         }
+        delete[] temp_parameter_sampled_indices;//yyd
     }
 
     int bool_int_temp;

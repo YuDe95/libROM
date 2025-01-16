@@ -142,8 +142,10 @@ target_include_directories(ROM PUBLIC
   ${HDF5_C_INCLUDE_DIRS}
   ${MPI_C_INCLUDE_DIRS}
   ${MFEM_C_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
+target_compile_definitions(ROM PRIVATE -DH5_BUILT_AS_DYNAMIC_LIB)
 # Find headers from the source file list that need to be installed
 set(HEADERS "")
 foreach(file IN LISTS source_files)

@@ -2044,7 +2044,8 @@ Matrix::rescale_cols_max()
     // to get the maximum of each column across all processes.
 
     // Find each column's max absolute value in the current process.
-    double local_max[d_num_cols];
+    // double local_max[d_num_cols];
+    double *local_max= new double[d_num_cols];
     for (int j = 0; j < d_num_cols; j++)
     {
         local_max[j] = fabs(item(0, j));
@@ -2054,9 +2055,10 @@ Matrix::rescale_cols_max()
                 local_max[j] = fabs(item(i, j));
         }
     }
-
+    delete [] local_max;
     // Get the max across all processes, if applicable.
-    double global_max[d_num_cols];
+    // double global_max[d_num_cols];
+    double *global_max = new double[d_num_cols];
     if (d_distributed && d_num_procs > 1)
     {
         MPI_Allreduce(&local_max, &global_max, d_num_cols, MPI_DOUBLE, MPI_MAX,
@@ -2078,6 +2080,7 @@ Matrix::rescale_cols_max()
                 item(i, j) *= tmp;
         }
     }
+    delete [] global_max;
 }
 
 Matrix outerProduct(const Vector &v, const Vector &w)
@@ -2431,7 +2434,8 @@ void SerialSVD(Matrix* A,
     int mn = std::min(m, n);
     int lwork = 4 * mn * mn + 7 * mn;
     double* work = new double [lwork];
-    int iwork[8*std::min(m, n)];
+    // int iwork[8*std::min(m, n)];//yyd
+    int* iwork = new int [8*std::min(m, n)];
     int info;
 
     dgesdd(&jobz, &m, &n, A_copy->getData(), &lda, S->getData(), U->getData(), &ldu,
@@ -2439,7 +2443,7 @@ void SerialSVD(Matrix* A,
            &ldv, work, &lwork, iwork, &info);
 
     CAROM_VERIFY(info == 0);
-
+    delete [] iwork;
     delete [] work;
     delete A_copy;
 }
