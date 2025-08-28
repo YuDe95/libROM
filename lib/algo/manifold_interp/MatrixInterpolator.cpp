@@ -17,7 +17,7 @@
 #include "linalg/Matrix.h"
 #include "linalg/scalapack_wrapper.h"
 #include "mpi.h"
-
+#include <Eigen/Dense>
 /* Use C++11 built-in shared pointers if available; else fallback to Boost. */
 #if __cplusplus >= 201103L
 #include <memory>
@@ -137,11 +137,13 @@ Matrix* MatrixInterpolator::interpolate(Vector* point, bool orthogonalize)
     {
         interpolated_matrix->orthogonalize();
     }
+    std::cout<<"Matrix* MatrixInterpolator::interpolate(Vector* point, bool orthogonalize)"<<std::endl;
     return interpolated_matrix;
 }
 
 void MatrixInterpolator::obtainLambda()
 {
+    std::cout<<"void MatrixInterpolator::obtainLambda()    "  <<d_interp_method<<std::endl;
     if (d_interp_method == "LS")
     {
         // Solving f = B*lambda
@@ -162,28 +164,49 @@ void MatrixInterpolator::obtainLambda()
             B->item(i, i) = 1.0;
             for (int j = i + 1; j < B->numColumns(); j++)
             {
+                // std::cout<<"d_epsilon"<<d_epsilon<<std::endl;
                 double res = obtainRBF(d_rbf, d_epsilon, d_parameter_points[i],
                                        d_parameter_points[j]);
                 B->item(i, j) = res;
                 B->item(j, i) = res;
             }
         }
-
+        // std::cout<<"d_epsilon"<<d_epsilon<<std::endl;
         char uplo = 'U';
         int gamma_size = d_gammas.size();
         int num_elements = d_gammas[0]->numRows() * d_gammas[0]->numColumns();
         int info;
 
-        dposv(&uplo, &gamma_size, &num_elements, B->getData(),  &gamma_size,
-              f_T->getData(), &gamma_size, &info);
-        if (info != 0)
-        {
-            std::cout << "Linear solve failed. Please choose a different epsilon value." <<
-                      std::endl;
-        }
-        CAROM_VERIFY(info == 0);
 
-        delete B;
+        // dposv(&uplo, &gamma_size, &num_elements, B->getData(),  &gamma_size,
+        //       f_T->getData(), &gamma_size, &info);
+        // if (info != 0)
+        // {
+        //     std::cout << "Linear solve failed. Please choose a different epsilon value.dposv:" <<info<<
+        //               std::endl;
+        //     delete B;
+        //     delete f_T;
+        //     return;
+        // }
+
+        // delete B;
+        // delete f_T;
+
+        // 将 B 的数据映射为 Eigen 的矩阵 A（gamma_size x gamma_size）
+        Eigen::Map<Eigen::MatrixXd> A(B->getData(), gamma_size, gamma_size);
+
+        // 将 f_T 的数据映射为 Eigen 的矩阵 X（gamma_size x num_elements）
+        Eigen::Map<Eigen::MatrixXd> X(f_T->getData(), gamma_size, num_elements);
+
+        // 使用 Cholesky 分解（上三角）
+        Eigen::LLT<Eigen::MatrixXd, Eigen::Upper> llt(A);
+
+        // 检查分解是否成功
+        if (llt.info() != Eigen::Success) { /* 处理错误，例如打印错误信息 */ }
+
+        // 直接解 Ax = b，结果存储在 X 中
+        llt.solveInPlace(X);
+
 
         d_lambda_T = f_T;
     }
@@ -333,7 +356,7 @@ Matrix* MatrixInterpolator::interpolateSPDMatrix(Vector* point)
         }
 
         delete x_half_power_inv;
-
+        std::cout<<"interpolateSPDMatrix use obtainLambda"<<std::endl;
         // Obtain lambda for the P interpolation matrix
         obtainLambda();
     }
@@ -446,7 +469,7 @@ Matrix* MatrixInterpolator::interpolateNonSingularMatrix(Vector* point)
         }
 
         delete ref_matrix_inv;
-
+        std::cout<<"interpolateNonSingularMatrix use obtainLambda"<<std::endl;
         // Obtain lambda for the P interpolation matrix
         obtainLambda();
     }
@@ -500,6 +523,7 @@ Matrix* MatrixInterpolator::interpolateNonSingularMatrix(Vector* point)
 
 Matrix* MatrixInterpolator::interpolateMatrix(Vector* point)
 {
+    std::cout<<"Matrix* MatrixInterpolator::interpolateMatrix(Vector* point)"<<std::endl;
     if (d_gammas.size() == 0)
     {
         for (int i = 0; i < d_parameter_points.size(); i++)
@@ -520,7 +544,6 @@ Matrix* MatrixInterpolator::interpolateMatrix(Vector* point)
                 d_gammas.push_back(gamma);
             }
         }
-
         // Obtain lambda for the P interpolation matrix
         obtainLambda();
     }

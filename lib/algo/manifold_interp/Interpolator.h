@@ -107,8 +107,8 @@ protected:
     /**
      * @brief The RHS of the linear solve in tangential space.
      */
-    Matrix* d_lambda_T;
-
+    Matrix* d_lambda_T = nullptr;
+    
 private:
 
     /**

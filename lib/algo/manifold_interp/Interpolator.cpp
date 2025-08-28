@@ -64,6 +64,7 @@ Interpolator::Interpolator(std::vector<Vector*> parameter_points,
 
 Interpolator::~Interpolator()
 {
+    std::cout<<"~Interpolator()"<<std::endl;
     delete d_lambda_T;
 }
 
@@ -197,6 +198,8 @@ double convertClosestRBFToEpsilon(std::vector<Vector*> parameter_points,
                 // Gaussian RBF
                 if (rbf == "G")
                 {
+                    std::cout<<"closest_rbf_val"<<closest_rbf_val<<std::endl;
+                    std::cout<<"diff.norm2()"<<diff.norm2()<<std::endl;
                     epsilon = std::sqrt(-std::log(closest_rbf_val) / diff.norm2());
                 }
                 // Inverse quadratic RBF
@@ -212,7 +215,6 @@ double convertClosestRBFToEpsilon(std::vector<Vector*> parameter_points,
             }
         }
     }
-
     return epsilon;
 }
 
